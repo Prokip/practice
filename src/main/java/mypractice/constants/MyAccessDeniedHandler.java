@@ -1,4 +1,4 @@
-package mypractice;
+package mypractice.constants;
 
 
 import org.slf4j.Logger;

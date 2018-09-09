@@ -1,8 +1,8 @@
-package mypractice;
+package mypractice.config;
 
+import mypractice.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,13 +27,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Autowired
+    private  UserServiceImpl userService;
+
+
+    @Qualifier("dataSource")
+    @Autowired
     private DataSource dataSource;
 
-    @Value("${spring.queries.users-query}")
-    private String usersQuery;
-
-    @Value("${spring.queries.roles-query}")
-    private String rolesQuery;
+//    @Value("${spring.queries.users-query}")
+//    private String usersQuery;
+//
+//    @Value("${spring.queries.roles-query}")
+//    private String rolesQuery;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -43,10 +49,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/").permitAll()
                 .antMatchers("/login").permitAll()
                 .antMatchers("/registration").permitAll()
-                .antMatchers("/admin").hasAuthority("ADMIN").anyRequest()
-                .authenticated().and().csrf().disable().formLogin()
+                .and().csrf().disable().formLogin()
                 .loginPage("/login").failureUrl("/login?error=true")
-                .defaultSuccessUrl("/admin")
+                .defaultSuccessUrl("/main")
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .and().logout()
@@ -60,11 +65,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     protected void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 
-        auth.jdbcAuthentication()
-                .usersByUsernameQuery(usersQuery)
-                .authoritiesByUsernameQuery(rolesQuery)
-                .dataSource(dataSource)
-                .passwordEncoder(bCryptPasswordEncoder);
+               auth
+                       .userDetailsService(userService)
+                       .passwordEncoder(bCryptPasswordEncoder);
+
+
+//        auth.jdbcAuthentication()
+//                .user
+//                .authoritiesByUsernameQuery(rolesQuery)
+//                .dataSource(dataSource)
+//                .passwordEncoder(bCryptPasswordEncoder);
     }
 
 
@@ -74,16 +84,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .ignoring()
                 .antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**");
     }
-//    @Bean
-//    @Override
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user =
-//                User.withDefaultPasswordEncoder()
-//                        .username("user")
-//                        .password("password")
-//                        .roles("USER")
-//                        .build();
-//
-//        return new InMemoryUserDetailsManager(user);
-//    }
+
 }

@@ -1,20 +1,21 @@
 package mypractice;
 
+
+import mypractice.constants.Role;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
-import java.util.Set;
+import java.util.Collection;
+import java.util.List;
+
 
 
 @Entity
-@Table(name="SECUR")
-public class User {
-
-//    public User(String lastName, String name, String password) {
-//        this.lastName = lastName;
-//        this.name = name;
-//        setPassword(password);
-//    }
+@Table(name="USER")
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,12 +27,6 @@ public class User {
     @NotEmpty(message = "*Please provide an email")
     private String email;
 
-
-//    public static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
-//    @JsonIgnore
-//    private String password;
-
-    @Transient
     private String password;
 
     @Column(name = "name")
@@ -46,8 +41,12 @@ public class User {
     private int active;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles;
+    private List<Role> roles;
 
+    public User(){}
+
+    public User(int id, String lastName, String email, String password) {
+    }
 
 
     public int getId() {
@@ -74,8 +73,38 @@ public class User {
         this.name = name;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
     }
 
     public void setPassword(String password) {
@@ -97,11 +126,11 @@ public class User {
         this.active = active;
     }
 
-    public Set<Role> getRoles() {
+    public List<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(List<Role> roles) {
         this.roles = roles;
     }
 }
